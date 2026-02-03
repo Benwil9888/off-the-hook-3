@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Off the Hook - Handcrafted Crochet Creations</title>
+  <link rel="stylesheet" href="css/off-the-hook-styles.css">
+</head>
+<body>
+
+  <!-- Decorative floral elements (CSS-based) -->
+  <div class="floral-decoration floral-top-left">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="40" cy="80" rx="25" ry="50" fill="#7a9b8e" opacity="0.6" transform="rotate(-30 40 80)"/>
+      <ellipse cx="30" cy="120" rx="20" ry="45" fill="#8ba896" opacity="0.5" transform="rotate(-20 30 120)"/>
+      <circle cx="90" cy="100" r="12" fill="#d4a5c7" opacity="0.7"/>
+      <circle cx="85" cy="95" r="8" fill="#c98fb8" opacity="0.8"/>
+      <circle cx="95" cy="105" r="8" fill="#c98fb8" opacity="0.8"/>
+    </svg>
+  </div>
+  
+  <div class="floral-decoration floral-top-right">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="120" cy="90" r="14" fill="#e8a598" opacity="0.7"/>
+      <circle cx="110" cy="85" r="10" fill="#d68976" opacity="0.8"/>
+      <circle cx="130" cy="95" r="10" fill="#d68976" opacity="0.8"/>
+      <ellipse cx="160" cy="100" rx="22" ry="48" fill="#7a9b8e" opacity="0.6" transform="rotate(25 160 100)"/>
+    </svg>
+  </div>
+
+  <div class="container">
+    
+    <!-- Header with Logo -->
+    <header class="header">
+      <div class="logo-container">
+        <img src="images/off-the-hook-logo.png" alt="Off the Hook Logo" class="logo">
+      </div>
+      
+      <!-- View Order Badge (top right) -->
+      <a href="checkout.html" class="view-order-badge">
+        <div class="basket-icon">🧺</div>
+        <span class="view-order-text">View Order</span>
+        <span class="order-count" id="cart-count">0</span>
+      </a>
+      
+      <h1 class="page-title">Handcrafted Crochet Creations</h1>
+    </header>
+
+    <!-- Products Grid -->
+    <div class="products-grid" id="products-grid">
+      <!-- Products loaded via JavaScript -->
+    </div>
+
+  </div>
+
+  <!-- Bottom decorative florals -->
+  <div class="floral-decoration floral-bottom-left">
+    <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="100" rx="20" ry="45" fill="#8ba896" opacity="0.6" transform="rotate(-25 60 100)"/>
+      <circle cx="100" cy="90" r="12" fill="#d4a5c7" opacity="0.7"/>
+    </svg>
+  </div>
+  
+  <div class="floral-decoration floral-bottom-right">
+    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="110" cy="160" rx="60" ry="40" fill="#d4a884" opacity="0.4"/>
+      <circle cx="90" cy="140" r="20" fill="#6b8ea8" opacity="0.6"/>
+      <circle cx="130" cy="145" r="22" fill="#2a6d6f" opacity="0.6"/>
+      <circle cx="110" cy="135" r="18" fill="#d4a5c7" opacity="0.6"/>
+    </svg>
+  </div>
+
+  <script>
+    // Product Data
+    const products = [
+      {
+        id: 1,
+        name: "Crochet Bouquets",
+        price: 1500,
+        description: "Handmade crochet bouquet",
+        image: "images/red-flowers.jpeg"
+      },
+      {
+        id: 2,
+        name: "Striped Crochet Shirts",
+        price: 3000,
+        description: "Handmade crochet shirt",
+        image: "images/shirt-2.jpeg"
+      },
+      {
+        id: 3,
+        name: "Black & White Crochet",
+        price: 2500,
+        description: "Classic black & white design",
+        image: "images/shirt.jpeg"
+      },
+      {
+        id: 4,
+        name: "Crochet Rugs",
+        price: 2500,
+        description: "Handmade crochet rugs",
+        image: "images/crop-top.jpeg"
+      }
+    ];
+
+    // Load products
+    function loadProducts() {
+      const grid = document.getElementById('products-grid');
+      
+      products.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div class="product-image-wrapper">
+            <img src="${product.image}" alt="${product.name}" class="product-image">
+          </div>
+          <div class="product-info">
+            <h2 class="product-name">${product.name}</h2>
+            <p class="product-price">Ksh ${product.price.toLocaleString()}</p>
+            <p class="product-description">${product.description}</p>
+            <button class="add-to-order-btn" onclick="addToOrder(${product.id})">
+             Add to Order
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      
+      updateCartCount();
+    }
+
+    function getCart() {
+      const cart = localStorage.getItem('offTheHookCart');
+      return cart ? JSON.parse(cart) : [];
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem('offTheHookCart', JSON.stringify(cart));
+    }
+
+    function addToOrder(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+      
+      let cart = getCart();
+      const existingItem = cart.find(item => item.id === productId);
+      
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          description: product.description,
+          image: product.image,
+          quantity: 1
+        });
+      }
+      
+      saveCart(cart);
+      updateCartCount();
+      
+      // Visual feedback
+      const btn = event.target;
+      const originalText = btn.textContent;
+      btn.textContent = 'Added! ✓';
+      btn.style.background = '#4caf50';
+      
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.style.background = '';
+      }, 1200);
+    }
+
+    function updateCartCount() {
+      const cart = getCart();
+      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+      document.getElementById('cart-count').textContent = totalItems;
+    }
+
+    loadProducts();
+  </script>
+
+</body>
+</html>

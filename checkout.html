@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Your Order - Off the Hook</title>
+  <link rel="stylesheet" href="css/off-the-hook-styles.css">
+</head>
+<body>
+
+  <!-- Decorative floral elements -->
+  <div class="floral-decoration floral-top-left">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="40" cy="80" rx="25" ry="50" fill="#7a9b8e" opacity="0.6" transform="rotate(-30 40 80)"/>
+      <ellipse cx="30" cy="120" rx="20" ry="45" fill="#8ba896" opacity="0.5" transform="rotate(-20 30 120)"/>
+      <circle cx="90" cy="100" r="12" fill="#d4a5c7" opacity="0.7"/>
+    </svg>
+  </div>
+  
+  <div class="floral-decoration floral-top-right">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="120" cy="90" r="14" fill="#e8a598" opacity="0.7"/>
+      <ellipse cx="160" cy="100" rx="22" ry="48" fill="#7a9b8e" opacity="0.6" transform="rotate(25 160 100)"/>
+    </svg>
+  </div>
+
+  <div class="container">
+    
+    <!-- Header -->
+    <div class="checkout-header">
+      <img src="images/off-the-hook-logo.png" alt="Off the Hook Logo" class="logo" style="max-width: 280px; margin-bottom: 20px;">
+      <h1 class="checkout-title">Review Your Order</h1>
+    </div>
+
+    <!-- Order Summary -->
+    <div id="order-content">
+      <!-- Will be populated by JavaScript -->
+    </div>
+
+  </div>
+
+  <!-- Bottom decorative florals -->
+  <div class="floral-decoration floral-bottom-right">
+    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="110" cy="160" rx="60" ry="40" fill="#d4a884" opacity="0.4"/>
+      <circle cx="90" cy="140" r="20" fill="#6b8ea8" opacity="0.6"/>
+      <circle cx="130" cy="145" r="22" fill="#2a6d6f" opacity="0.6"/>
+      <circle cx="110" cy="135" r="18" fill="#d4a5c7" opacity="0.6"/>
+    </svg>
+  </div>
+
+  <script>
+    function getCart() {
+      const cart = localStorage.getItem('offTheHookCart');
+      return cart ? JSON.parse(cart) : [];
+    }
+
+    function saveCart(cart) {
+      localStorage.setItem('offTheHookCart', JSON.stringify(cart));
+    }
+
+    function removeItem(productId) {
+      let cart = getCart();
+      cart = cart.filter(item => item.id !== productId);
+      saveCart(cart);
+      loadOrder();
+    }
+
+    function calculateTotal(cart) {
+      return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    }
+
+    function generateWhatsAppMessage(cart, total) {
+      let message = "Hi! I'd like to order the following from Off the Hook:\n\n";
+      
+      cart.forEach((item, index) => {
+        message += `${index + 1}. ${item.name}\n`;
+        message += `   Quantity: ${item.quantity}\n`;
+        message += `   Price: Ksh ${(item.price * item.quantity).toLocaleString()}\n\n`;
+      });
+      
+      message += `Total: Ksh ${total.toLocaleString()}\n\n`;
+      message += "Please confirm availability and delivery details. Thank you!";
+      
+      return encodeURIComponent(message);
+    }
+
+    function loadOrder() {
+      const cart = getCart();
+      const container = document.getElementById('order-content');
+      
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="order-summary-card">
+            <div class="empty-order">
+              <p class="empty-order-text">Your order is empty</p>
+              <a href="index.html" class="back-to-shop-btn">
+                ← Browse Products
+              </a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      const total = calculateTotal(cart);
+      
+      let orderHTML = '<div class="order-summary-card">';
+      
+      // Order items
+      cart.forEach(item => {
+        orderHTML += `
+          <div class="order-item">
+            <img src="${item.image}" alt="${item.name}" class="order-item-image">
+            <div class="order-item-details">
+              <h3 class="order-item-name">${item.name}</h3>
+              <p class="order-item-description">${item.description}</p>
+              <p class="order-item-price">Ksh ${item.price.toLocaleString()}</p>
+            </div>
+            <div class="order-item-quantity">
+              <strong>${item.quantity}</strong>
+            </div>
+            <button class="remove-btn" onclick="removeItem(${item.id})">Remove</button>
+          </div>
+        `;
+      });
+      
+      // Total
+      orderHTML += `
+        <div class="order-total">
+          <span class="total-label">Total</span>
+          <span class="total-amount">Ksh ${total.toLocaleString()}</span>
+        </div>
+      `;
+      
+      orderHTML += '</div>';
+      
+      // WhatsApp button
+      const whatsappNumber = "254725685634"; // Replace with your actual WhatsApp number
+      const whatsappMessage = generateWhatsAppMessage(cart, total);
+      const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
+      
+      orderHTML += `
+        <a href="${whatsappLink}" target="_blank" class="whatsapp-order-btn">
+          <span class="whatsapp-icon">💬</span>
+          Place Order via WhatsApp
+        </a>
+        
+        <div style="text-align: center; margin-top: 20px;">
+          <a href="index.html" class="back-to-shop-btn">
+            ← Continue Shopping
+          </a>
+        </div>
+      `;
+      
+      container.innerHTML = orderHTML;
+    }
+
+    loadOrder();
+  </script>
+
+</body>
+</html>
